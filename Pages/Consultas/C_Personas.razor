@@ -1,0 +1,67 @@
+﻿@page "/c_personas"
+@inject PersonasBLL PersonasBLL;
+
+<EditForm Model="lista">
+    <DataAnnotationsValidator />
+
+    
+
+    <div class="card">
+    <div class="card-header text-center" >
+        <h3>Consulta Ocupaciones</h3>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>PersonaID</th>
+                    <th>Nombre</th>
+                    <th>Telefono</th>
+                    <th>Celular</th>
+                    <th>Email</th>
+                    <th>Direccion</th>
+                    <th>Fecha Nacimiento</th>
+                    <th>OcupacionID</th>
+
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var persona in lista)
+                {
+                    <tr>
+                        <td>@persona.PersonaId</td>
+                        <td>@persona.Nombre</td>
+                        <td>@persona.Telefono</td>
+                        <td>@persona.Celular</td>
+                        <td>@persona.Email</td>
+                        <td>@persona.Direccion</td>
+                        <td>@persona.FechaNacimiento</td>
+                        <td>@persona.OcupacionId</td>
+                        <td><a href="persona/@persona.PersonaId">Ver</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</EditForm>
+
+@code
+{
+    public string Filtro { get; set; } = "";
+    public string Criterio { get; set; } = "";
+
+    public List<Persona> lista { get; set; } = new List<Persona>();
+    public void Buscar()
+    {
+        lista = PersonasBLL.GetList(o => true);
+    }
+
+    protected override void OnInitialized()
+    {
+        Buscar();
+    }
+
+}

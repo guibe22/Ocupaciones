@@ -1,0 +1,114 @@
+﻿@page "/ocupacion"
+@page "/ocupacion/{OcupacionId:int}"
+@inject OcupacionesBLL ocupacionesBll
+
+
+<EditForm Model="ocupacion" OnInvalidSubmit="Guardar">
+    <div class="card">
+    <div class="card-header text-center">
+        <h2 class="text-primary">Registro de Ocupaciones</h2>
+    </div>
+    <div class="card-body">
+        <div class="form-row align-items-center">
+            <div class="col-auto">
+
+                <label for="idOcupacion" class="text-primary">ID Ocupación:</label>
+                <InputNumber @bind-Value="ocupacion.OcupacionId" class="form-control col-4" />
+
+                <button name="btnBuscar" id="btnBuscar" class="btn btn-primary" @onclick="Buscar">
+                    <span class="oi oi-magnifying-glass"></span> Buscar
+                </button>
+            </div>
+            
+        </div>
+        <div class="form-group">
+            <label for="txtDescripcion" class="text-primary">Descripción:</label>
+            <InputText @bind-Value="ocupacion.Descripcion" class="form-control" />
+        </div>
+        <div class="form-group ">
+            <label for="txtsalario" class="text-primary">Salario:</label>
+            <InputNumber @bind-Value="ocupacion.Salario" class="form-control" />
+        </div>
+    </div>
+
+    <div class=" card-footer text-center">
+        <button name="btNuevo" id="btNuevo" class="btn btn-primary mr-2" @onclick="Nuevo">
+            <span class="oi oi-plus"></span> Nuevo
+        </button>
+        <button name="btnGuardar" id="btnGuardar" class="btn btn-success mr-2" @onclick="Guardar">
+            <span class=" oi oi-cloud-download"></span> Guardar
+        </button>
+        <button name="btnEliminar" id="btnEliminar" class="btn btn-danger"  @onclick="Eliminar">
+            <span class="oi oi-trash"></span> Eliminar
+        </button>
+    </div>
+</div>
+
+</EditForm>
+
+
+@code {
+
+    [Parameter]
+
+    public int OcupacionId { get; set; }
+    public Ocupaciones ocupacion{get; set;} = new Ocupaciones();
+
+    // incializar
+
+        protected override void OnInitialized()
+        {
+            if(OcupacionId>0){
+                this.ocupacion.OcupacionId= OcupacionId;
+                this.Buscar();
+            }
+        }
+
+
+        void Buscar(){
+
+            var OcupacionEncontrada = ocupacionesBll.Buscar(ocupacion.OcupacionId);
+
+            if(OcupacionEncontrada!=null){
+                this.ocupacion= OcupacionEncontrada;
+            }
+        }
+
+
+        void Nuevo(){
+
+            this.ocupacion= new Ocupaciones();
+
+        }
+
+
+        void Guardar(){
+
+            if(!Validar()){ return;}
+
+            if(ocupacionesBll.Guardar(this.ocupacion)){
+                this.Nuevo();
+            }
+
+
+
+        }
+
+
+
+        bool Validar()=> !string.IsNullOrEmpty(ocupacion.Descripcion) && ocupacion.Salario >= 0;
+
+
+
+        void Eliminar(){
+            ocupacionesBll.Eliminar(this.ocupacion);
+        }
+
+
+
+
+}
+
+
+       
+

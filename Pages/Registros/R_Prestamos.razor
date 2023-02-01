@@ -1,0 +1,154 @@
+﻿@page "/prestamo"
+
+@page "/prestamo/{PrestamoId:int}"
+
+@inject PersonasBLL PersonasBLL
+
+@inject PrestamosBLL PrestamosBLL
+
+<EditForm Model="prestamo" OnInvalidSubmit="Guardar">
+
+    <div class="card text-primary">
+        <div class="card-header text-center">
+            <h1>Registro De Prestamos</h1>
+        </div>
+        <div class="card-body">
+            <div class="col-3">
+                <label for="txtId" class="form-label"> PrestamoID:</label>
+                <input type="number"  id="txtid" class="form-control" @bind-value="prestamo.PrestamoId">
+            </div>
+
+             <button name="btnBuscar" id="btnBuscar" class="btn btn-primary col-2" @onclick="Buscar">
+                 <span class="oi oi-magnifying-glass"></span> Buscar
+            </button>
+
+
+             <div class="row">
+            <div class="col-6">
+                <label for="txtFecha" class="form-label">Fecha:</label>
+                <input type="date"  id="txtFecha" class="form-control" @bind-value="prestamo.Fecha">
+            </div>
+            
+
+            
+            <div class="col-6">
+                <label for="txtVence" class="form-label">Vence:</label>
+                <input type="date"  id="txtVence" class="form-control" @bind-value="prestamo.Vence">
+            </div>
+
+            <div class="row">
+            <div class="col-6" >
+                <label for="txtPersonaID" class="form-label">PersonaID:</label>
+                <input type="number"  id="txtPersonaID" class="form-control" @bind-value="prestamo.PersonaId">
+            </div>
+
+            <div class="col-6">
+                <label for="txtConcepto">Concepto:</label>
+                <input type="text"  id="txtConcepto" class="form-control" @bind-value="prestamo.Concepto">
+            </div>
+        </div>
+
+      <div class="row">
+            <div class="col-6" >
+                <label for="txtMonto" class="form-label">Monto:</label>
+                <input type="number"  id="txtMonto" class="form-control" @bind-value="prestamo.Monto">
+            </div>
+
+            <div class="col-6">
+                <label for="txtBalance">Balance:</label>
+                <input type="text"  id="txtBalance" class="form-control" @bind-value="prestamo.Balance">
+            </div>
+        </div>
+
+        </div>
+
+        </div>
+        
+        <div class=" card-footer text-center">
+
+             <button name="btNuevo" id="btNuevo" class="btn btn-primary mr-2" @onclick="Nuevo">
+            <span class="oi oi-plus"></span> Nuevo
+            </button>
+
+            <button name="btnGuardar" id="btnGuardar" class="btn btn-success mr-2" @onclick="Guardar">
+            <span class=" oi oi-cloud-download"></span> Guardar
+            </button>
+
+            <button name="btnEliminar" id="btnEliminar" class="btn btn-danger"  @onclick="Eliminar">
+            <span class="oi oi-trash"></span> Eliminar
+            </button>
+        </div>
+
+        </div>
+   
+
+    
+
+
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public int PrestamoId { get; set; }
+
+    public  Prestamos prestamo {get; set;} = new Prestamos();
+
+    protected override void OnInitialized()
+    {
+        if(PrestamoId>0){
+            this.prestamo.PrestamoId = PrestamoId;
+            this.Buscar();
+        }
+        
+    }
+
+    void Buscar(){
+        var PrestamoEncontrado = PrestamosBLL.Buscar(prestamo.PrestamoId);
+        if(PrestamoEncontrado!=null){
+            this.prestamo= PrestamoEncontrado;
+        }
+    }
+
+    void Eliminar(){
+
+   if(PrestamosBLL.Eliminar(prestamo)){
+            this.Nuevo();
+   }
+
+    }
+
+    bool Validar(){
+        bool validacion= true;
+        if(!PersonasBLL.Existe(prestamo.PersonaId)){ validacion= false;}
+        if(String.IsNullOrEmpty(prestamo.Concepto)){ validacion= false;}
+        if(prestamo.Monto <=0){validacion =false;}
+        if(prestamo.Balance<=0){ validacion= false;}
+
+        return validacion;
+
+
+    }
+
+    void Guardar(){
+
+        if(!Validar()){return;}
+
+        if(PrestamosBLL.Guardar(prestamo)){
+           this.Nuevo();
+        }
+    }
+
+    void Nuevo(){
+
+        this.prestamo= new Prestamos();
+    }
+   
+
+
+
+
+
+
+   
+}
