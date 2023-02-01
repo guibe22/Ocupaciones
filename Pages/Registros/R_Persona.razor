@@ -76,7 +76,12 @@
             <div class="col-6">
 
                     <label for="txtOcupacionId"class="form-label">Ocupacion ID:</label>
-                    <input type="Number"  id="txtOcupacionId" class="form-control" @bind-value="persona.OcupacionId">
+                    <InputSelect class="form-select" @bind-Value="persona.OcupacionId">
+                        @foreach (var ocupacion in ocupacionesBll.GetList(o => true) )
+                        {
+                            <option value="@ocupacion.OcupacionId">@ocupacion.Descripcion</option>
+                        }
+                    </InputSelect>
                 
             </div>
              </div>
@@ -108,12 +113,18 @@
 
     [Parameter]
 
-
+   
     public int PersonaId { get; set; }
     public Persona persona { get; set; } =new Persona();
 
+
+   
+
     protected override void OnInitialized()
         {
+
+           
+
             if(PersonaId>0){
                 this.persona.PersonaId = PersonaId;
                 this.Buscar();
