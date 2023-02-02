@@ -13,7 +13,10 @@ public class Persona
      public String? Direccion { get; set; }
 
      public DateTime FechaNacimiento { get; set; }
-    public int OcupacionId { get; set; }
+
+      public int OcupacionId { get; set; }
+  
+      public int Balance { get; set; }
 
 
 

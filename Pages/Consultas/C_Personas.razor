@@ -8,7 +8,7 @@
 
     <div class="card">
     <div class="card-header text-center" >
-        <h3>Consulta Ocupaciones</h3>
+        <h3>Consulta Personas</h3>
     </div>
     <div class="card-body">
         <table class="table">
@@ -22,6 +22,7 @@
                     <th>Direccion</th>
                     <th>Fecha Nacimiento</th>
                     <th>OcupacionID</th>
+                    <th>Balance</th>
 
                     <th></th>
                 </tr>
@@ -38,6 +39,7 @@
                         <td>@persona.Direccion</td>
                         <td>@persona.FechaNacimiento</td>
                         <td>@persona.OcupacionId</td>
+                        <td>@persona.Balance</td>
                         <td><a href="persona/@persona.PersonaId">Ver</a></td>
                     </tr>
                 }
@@ -63,5 +65,7 @@
     {
         Buscar();
     }
+
+    
 
 }

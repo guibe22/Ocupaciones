@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace prestamos.Migrations
 {
     [DbContext(typeof(Contexto))]
-    [Migration("20230201023958_inicial")]
+    [Migration("20230202120049_inicial")]
     partial class inicial
     {
         /// <inheritdoc />
@@ -41,6 +41,9 @@ namespace prestamos.Migrations
                 {
                     b.Property<int>("PersonaId")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Balance")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Celular")

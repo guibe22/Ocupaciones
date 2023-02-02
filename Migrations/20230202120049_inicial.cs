@@ -37,7 +37,8 @@ namespace prestamos.Migrations
                     Email = table.Column<string>(type: "TEXT", nullable: true),
                     Direccion = table.Column<string>(type: "TEXT", nullable: true),
                     FechaNacimiento = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    OcupacionId = table.Column<int>(type: "INTEGER", nullable: false)
+                    OcupacionId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Balance = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
