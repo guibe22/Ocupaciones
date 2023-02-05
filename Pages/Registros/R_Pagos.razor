@@ -1,0 +1,185 @@
+﻿@page "/pago"
+
+@page "/pago/{PagosId:int}"
+
+@inject PersonasBLL PersonasBLL
+
+@inject PrestamosBLL PrestamosBLL
+
+@inject PagosBLL PagosBLL
+
+@inject PagosDetalleBLL PagosDetalleBLL
+
+<EditForm Model="pago" OnInvalidSubmit="Guardar">
+
+<div class= "card text-primary">
+    <div class="card-header text-center">
+        <h1>Registro Pagos</h1>
+    </div>
+
+    <div class="card-body">
+        <div class="row">
+
+            <div class="col-3">
+                <label for="txtId" class="form-label"> PagoID:</label>
+                <input type="number"  id="txtid" class="form-control" @bind-value="pago.PagosId">
+            </div>
+            
+        </div>
+
+        <button name="btnBuscar" id="btnBuscar" class="btn btn-primary col-2" @onclick="Buscar">
+                 <span class="oi oi-magnifying-glass"></span> Buscar
+            </button>
+        <div class="row">
+            <div class="col-6" >
+                <label for="txtPersonaID" class="form-label">PersonaID:</label>
+                
+                <InputSelect class="form-select" @bind-Value="pago.PersonaId">
+                        @foreach (var persona in PersonasBLL.GetList(o => true) )
+                        {
+                            <option value="@persona.PersonaId">@persona.Nombre</option>
+                        }
+                    </InputSelect>
+            </div>
+
+            <div class="col-6" >
+                <label for="txtPrestamoId" class="form-label">PrestamoID:</label>
+                
+                <InputSelect class="form-select" @bind-Value="pagoDetalle.PrestamoId">
+
+                         @if (PrestamosBLL.GetList(o => o.PersonaId == pago.PersonaId).Count == 1)
+                        {
+                            var prestamo = PrestamosBLL.GetList(o => o.PersonaId == pago.PersonaId).FirstOrDefault();
+
+                            pagoDetalle.PrestamoId = prestamo.PrestamoId;
+                         }
+                        @foreach (var prestamo in PrestamosBLL.GetList(o => o.PersonaId==pago.PersonaId) )
+                        {
+                            <option value="@prestamo.PrestamoId">@prestamo.Concepto</option>
+                        }
+                    </InputSelect>
+            </div>
+
+
+        </div>
+
+        <div class="row">
+            <div class="col-6">
+                <label for="txtFecha" class="form-label"> Fecha:</label>
+                <input type="date"  id="txtFecha" class="form-control" @bind-value="pago.Fecha">
+            </div>
+
+             <div class="col-6">
+                <label for="txtConcepto" class="form-label"> Concepto:</label>
+                <input type="text"  id="txtConcepto" class="form-control" @bind-value="pago.Concepto">
+            </div>
+
+        </div>
+
+
+         <div class="col-6">
+                <label for="txtMonto" class="form-label"> Monto:</label>
+                <input type="number"  id="txtMonto" class="form-control" @bind-value="pago.Monto">
+            </div>
+
+    </div>
+    <div class=" card-footer text-center">
+
+             <button name="btNuevo" id="btNuevo" class="btn btn-primary mr-2" @onclick="Nuevo">
+            <span class="oi oi-plus"></span> Nuevo
+            </button>
+
+            <button name="btnGuardar" id="btnGuardar" class="btn btn-success mr-2" @onclick="Guardar">
+            <span class=" oi oi-cloud-download"></span> Guardar
+            </button>
+
+            <button name="btnEliminar" id="btnEliminar" class="btn btn-danger"  @onclick="Eliminar">
+            <span class="oi oi-trash"></span> Eliminar
+            </button>
+        </div>
+</div>
+
+   
+
+    
+
+
+</EditForm>
+
+
+@code {
+    [Parameter]
+   
+public int PagosId{ get; set; }
+
+public Pagos pago { get; set; }= new Pagos();
+public PagosDetalle pagoDetalle { get; set; }= new PagosDetalle();
+
+protected override void OnInitialized()
+{
+    if(PagosId>0){
+                this.pago.PagosId = PagosId;
+                this.pagoDetalle.Id = PagosId;
+                this.Buscar();
+           }
+}
+
+void Buscar(){
+
+    var PagoEncontrado= PagosBLL.Buscar(pago.PagosId);
+    var PagoDetalleEncontrado= PagosDetalleBLL.Buscar(pago.PagosId);
+    if(PagoEncontrado!=null ){
+        this.pago= PagoEncontrado;
+        this.pagoDetalle= PagoDetalleEncontrado;
+    }
+}
+
+void Eliminar(){
+
+
+    
+    PagosBLL.Eliminar(pago);
+    PagosDetalleBLL.Eliminar(pagoDetalle);
+    this.Nuevo();
+
+   
+
+}
+
+bool Validar(){
+
+      bool validacion= true;
+        if(!PersonasBLL.Existe(pago.PersonaId)){ validacion= false;}
+        if(!PrestamosBLL.Existe(pagoDetalle.PrestamoId)){   validacion= false;}
+        if(String.IsNullOrEmpty(pago.Concepto)){  validacion= false;}
+        if(pago.Monto <=0){  validacion =false;}
+       
+
+        return validacion;
+
+   
+}
+
+void Guardar(){
+ if(!Validar()){  Console.WriteLine("**********************AQUI TA EL FALLO****************") ; return;}
+
+ pagoDetalle.PersonaId= pago.PersonaId;
+ pagoDetalle.ValorPagado = pago.Monto;
+
+ PagosDetalleBLL.Guardar(pagoDetalle);
+
+ if(PagosBLL.Guardar(pago) ){
+    this.Nuevo();
+ }
+
+
+
+}
+
+void Nuevo(){
+
+        this.pago= new Pagos();
+        this.pagoDetalle = new PagosDetalle();
+    }
+   
+}

@@ -34,6 +34,49 @@ namespace prestamos.Migrations
                     b.ToTable("Opcupaciones");
                 });
 
+            modelBuilder.Entity("Pagos", b =>
+                {
+                    b.Property<int>("PagosId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Concepto")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Monto")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PersonaId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("PagosId");
+
+                    b.ToTable("Pagos");
+                });
+
+            modelBuilder.Entity("PagosDetalle", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PersonaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PrestamoId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ValorPagado")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PagosDetalle");
+                });
+
             modelBuilder.Entity("Persona", b =>
                 {
                     b.Property<int>("PersonaId")

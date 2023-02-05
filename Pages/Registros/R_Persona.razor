@@ -99,7 +99,7 @@
             <span class=" oi oi-cloud-download"></span> Guardar
             </button>
 
-            <button name="btnEliminar" id="btnEliminar" class="btn btn-danger"  @onclick="Eliminar">
+            <button name="btnEliminar"  id="btnEliminar" class="btn btn-danger"  @onclick="Eliminar">
             <span class="oi oi-trash"></span> Eliminar
             </button>
         </div>
@@ -113,9 +113,11 @@
 
     [Parameter]
 
-   
+    
     public int PersonaId { get; set; }
     public Persona persona { get; set; } =new Persona();
+
+    
 
 
    

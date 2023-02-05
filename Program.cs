@@ -14,6 +14,8 @@ builder.Services.AddDbContext<Contexto>(options=>options.UseSqlite(ConStr));
 builder.Services.AddScoped<OcupacionesBLL>();
 builder.Services.AddScoped<PersonasBLL>();
 builder.Services.AddScoped<PrestamosBLL>();
+builder.Services.AddScoped<PagosBLL>();
+builder.Services.AddScoped<PagosDetalleBLL>();
 
 // Add services to the container.
 builder.Services.AddRazorPages();

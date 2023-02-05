@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace prestamos.Migrations
 {
     [DbContext(typeof(Contexto))]
-    [Migration("20230202120049_inicial")]
+    [Migration("20230205145430_inicial")]
     partial class inicial
     {
         /// <inheritdoc />
@@ -35,6 +35,49 @@ namespace prestamos.Migrations
                     b.HasKey("OcupacionId");
 
                     b.ToTable("Opcupaciones");
+                });
+
+            modelBuilder.Entity("Pagos", b =>
+                {
+                    b.Property<int>("PagosId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Concepto")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Monto")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PersonaId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("PagosId");
+
+                    b.ToTable("Pagos");
+                });
+
+            modelBuilder.Entity("PagosDetalle", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PersonaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PrestamoId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ValorPagado")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PagosDetalle");
                 });
 
             modelBuilder.Entity("Persona", b =>
