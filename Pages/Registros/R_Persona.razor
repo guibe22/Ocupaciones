@@ -3,30 +3,40 @@
 @page "/persona/{PersonaId:int}"
 
 @inject PersonasBLL PersonasBLL
-
 @inject OcupacionesBLL ocupacionesBll
+@inject NotificationService notificationService
 
 <EditForm Model="persona" OnInvalidSubmit="Guardar">
+
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
 
     <div class="card text-primary">
         <div class="card-header text-center">
             <h1>Registro De Personas</h1>
         </div>
         <div class="card-body">
-            <div class="col-3">
+            <div class="row">
+
+                <div class="col-3">
 
                 <label for="txtId"class="form-label">Persona ID:</label>
                 <input type="number"  id="txtId" class="form-control" @bind-value="persona.PersonaId">
             </div>
 
-            <button name="btnBuscar" id="btnBuscar" class="btn btn-primary" @onclick="Buscar">
-                 <span class="oi oi-magnifying-glass"></span> Buscar
-            </button>
+             <div class="col-3 d-flex align-items-end">
+                     <button name="btnBuscar" id="btnBuscar" class="btn btn-primary col-2" >
+                        <span class="oi oi-magnifying-glass"></span> 
+                    </button>
+                </div>
+            </div>
+            
 
             <div class="col-6">
 
                 <label for="txtNombre"class="form-label">Nombre:</label>
                 <input type="text"  id="txtNombre" class="form-control" @bind-value="persona.Nombre">
+                <ValidationMessage For="@(() => persona.Nombre)" />
                 
             </div>
 
@@ -36,6 +46,7 @@
 
                 <label for="txtTelefono"class="form-label">Telefono:</label>
                 <input type="number"  id="txtTelefono" class="form-control" @bind-value="persona.Telefono">
+                <ValidationMessage For="@(() => persona.Telefono)" />
                 
                 </div>
 
@@ -43,6 +54,7 @@
 
                 <label for="txtCelcular"class="form-label">Celular:</label>
                 <input type="number"  id="txtCelcular" class="form-control" @bind-value="persona.Celular">
+                <ValidationMessage For="@(() => persona.Celular)" />
                 
                 </div>
 
@@ -54,12 +66,14 @@
 
                     <label for="txtEmail"class="form-label">Email:</label>
                     <input type="email" id="txtEmail" class="form-control" @bind-value="persona.Email">
+                    <ValidationMessage For="@(() => persona.Email)" />
                 
                 </div>
                 <div class="col-6">
 
                     <label for="txtDireccion"class="form-label">Direccion:</label>
                     <input type="text"  id="txtDireccion" class="form-control" @bind-value="persona.Direccion">
+                    <ValidationMessage For="@(() => persona.Direccion)" />
                 
                 </div>
              </div>
@@ -70,6 +84,7 @@
 
                     <label for="txtFecha"class="form-label">Fecha:</label>
                     <input type="date"  id="txtFecha" class="form-control" @bind-value="persona.FechaNacimiento">
+                    <ValidationMessage For="@(() => persona.FechaNacimiento)" />
                 
                 </div>
 
@@ -82,6 +97,7 @@
                             <option value="@ocupacion.OcupacionId">@ocupacion.Descripcion</option>
                         }
                     </InputSelect>
+                    <ValidationMessage For="@(() => persona.OcupacionId)" />
                 
             </div>
              </div>
@@ -115,7 +131,7 @@
 
     
     public int PersonaId { get; set; }
-    public Persona persona { get; set; } =new Persona();
+    public Personas persona { get; set; } =new Personas();
 
     
 
@@ -146,21 +162,40 @@
 
     void Eliminar(){
 
-        if(PersonasBLL.Eliminar(this.persona)){Nuevo();}
+       if(!PersonasBLL.Existe(persona.PersonaId)){
 
-            this.Nuevo();
-        }
+                ShowNotification(
+                    new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Warning,
+                        Summary = "este campo no Existe en la base de datos"
+                    });
+
+                return;
+                }
+            if(PersonasBLL.Eliminar(persona)){
+
+                 ShowNotification(
+                    new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Info,
+                        Summary = "Eliminado correctamente"
+                    });
+                 this.Nuevo();
+
+            }
+            }
     
     bool Validar(){
 
         bool validacion= true;
 
-        if (String.IsNullOrEmpty(persona.Nombre)){ validacion= false;}
-        if (String.IsNullOrEmpty(persona.Telefono)|| persona.Telefono.Length !=10) { validacion= false;}
+        if (String.IsNullOrEmpty(persona.Nombre)){; validacion= false;}
+        if (String.IsNullOrEmpty(persona.Telefono)|| persona.Telefono.Length !=10) {   validacion= false;}
         if (String.IsNullOrEmpty(persona.Celular)|| persona.Celular.Length !=10 ){ validacion= false;}
         if (String.IsNullOrEmpty(persona.Email)){ validacion= false;}
-        if (String.IsNullOrEmpty(persona.Direccion)){ validacion= false;}
-        if (!ocupacionesBll.Existe(persona.OcupacionId)){ validacion= false;}
+        if (String.IsNullOrEmpty(persona.Direccion)){  validacion= false;}
+        if (!ocupacionesBll.Existe(persona.OcupacionId)){validacion= false;}
 
         return validacion;
 
@@ -168,9 +203,28 @@
 
     void Guardar(){
 
-            if(!Validar()){ return;}
+            if(PersonasBLL.GetList(o => o.Nombre== persona.Nombre).Count==1 &&
+             !PersonasBLL.Existe(persona.PersonaId)){
+                ShowNotification(
+                    new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Summary = "Esta persona ya existe en la base de datos."
+                    });
+                    return;
 
-            if( PersonasBLL.Guardar(this.persona)){Nuevo();}
+            }
+            if(!Validar()){  return;}
+
+            if( PersonasBLL.Guardar(this.persona)){
+                ShowNotification(
+                     new NotificationMessage
+                    {
+                         Severity = NotificationSeverity.Success,
+                         Summary = "Guardado Correctamente"
+                     });
+                Nuevo();
+                }
 
 
 
@@ -178,19 +232,16 @@
 
     void Nuevo(){
 
-        this.persona= new Persona();
+        this.persona= new Personas();
     }
 
-       
+        void ShowNotification(NotificationMessage message)
+    {
+        notificationService.Notify(message);
+
+    }
 
 
-    
-
-
-        
-
-
-
-
+ 
 
 }

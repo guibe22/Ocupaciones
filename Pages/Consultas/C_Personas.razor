@@ -1,18 +1,45 @@
 ﻿@page "/c_personas"
 @inject PersonasBLL PersonasBLL;
+@inject NotificationService notificationService
 
 <EditForm Model="lista">
     <DataAnnotationsValidator />
 
-    
 
-    <div class="card">
+
+    <div class="card text-primary">
     <div class="card-header text-center" >
         <h3>Consulta Personas</h3>
     </div>
     <div class="card-body">
+        <div  class="row">
+            <div class="col-3">
+                 <label class="form-label">Criterio</label>
+                <input type="text" class="form-control" @bind="Criterio">
+            </div>
+            <div class="col-2">
+                <label class="form-label">Filtro</label
+                <select class="form-control" @bind="Filtro">
+                    <option value="1">PersonaId</option>
+                    <option value="2">Nombre</option>
+                    <option value="3">Telefono </option>
+                    <option value="4">Celular</option>
+                    <option value="5">Email</option>
+                    <option value="6">Direccion</option>
+                    <option value="7">FechaNacimiento</option>
+                    <option value="8">OcupacionId</option>
+                    <option value="9">Balance</option>
+                    <option value="10">Mostrar Todos</option>
+
+                </select>
+            </div>
+         </div>
+         <button type="button" class="btn btn-primary" @onclick="Buscar">
+                    <span class="oi oi-magnifying-glass"></span>
+         </button>
         <table class="table">
             <thead>
+
                 <tr>
                     <th>PersonaID</th>
                     <th>Nombre</th>
@@ -24,25 +51,27 @@
                     <th>OcupacionID</th>
                     <th>Balance</th>
 
+
                     <th></th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var persona in lista)
-                {
-                    <tr>
-                        <td>@persona.PersonaId</td>
-                        <td>@persona.Nombre</td>
-                        <td>@persona.Telefono</td>
-                        <td>@persona.Celular</td>
-                        <td>@persona.Email</td>
-                        <td>@persona.Direccion</td>
-                        <td>@persona.FechaNacimiento</td>
-                        <td>@persona.OcupacionId</td>
-                        <td>@persona.Balance</td>
-                        <td><a href="persona/@persona.PersonaId">Ver</a></td>
-                    </tr>
-                }
+                    @foreach (var persona in lista)
+
+                    {
+                            <tr>
+                                <td>@persona.PersonaId</td>
+                                <td>@persona.Nombre</td>
+                                <td>@persona.Telefono</td>
+                                <td>@persona.Celular</td>
+                                <td>@persona.Email</td>
+                                <td>@persona.Direccion</td>
+                                <td>@persona.FechaNacimiento</td>
+                                <td>@persona.OcupacionId</td>
+                                <td>@persona.Balance</td>
+                                <td><a href="persona/@persona.PersonaId">Ver</a></td>
+                            </tr>
+                    }
             </tbody>
         </table>
     </div>
@@ -51,21 +80,77 @@
 </EditForm>
 
 @code
+
 {
     public string Filtro { get; set; } = "";
     public string Criterio { get; set; } = "";
+    public List<Personas> lista { get; set; } = new List<Personas>();
 
-    public List<Persona> lista { get; set; } = new List<Persona>();
     public void Buscar()
     {
-        lista = PersonasBLL.GetList(o => true);
+        switch (Filtro)
+        {
+
+            case "1":
+                lista = PersonasBLL.GetList(o => o.PersonaId.ToString().Contains(Criterio));
+                break;
+
+            case "2":
+                lista = PersonasBLL.GetList(o => (o.Nombre ?? "").Contains(Criterio));
+                break;
+
+            case "3":
+                lista = PersonasBLL.GetList(o => (o.Telefono ?? "").Contains(Criterio));
+                break;
+
+            case "4":
+                lista = PersonasBLL.GetList(o => (o.Celular ?? "").Contains(Criterio));
+                break;
+
+            case "5":
+                lista = PersonasBLL.GetList(o => (o.Email ?? "").Contains(Criterio));
+                break;
+
+            case "6":
+                lista = PersonasBLL.GetList(o => (o.Direccion ?? "").Contains(Criterio));
+                break;
+
+            case "7":
+                lista = PersonasBLL.GetList(o => o.FechaNacimiento.ToString().Contains(Criterio));
+                break;
+
+            case "8":
+                lista = PersonasBLL.GetList(o => o.OcupacionId.ToString().Contains(Criterio));
+                break;
+
+            case "9":
+                lista = PersonasBLL.GetList(o => o.Balance.ToString().Contains(Criterio));
+                break;
+             case "10":
+                lista = PersonasBLL.GetList(o => true);
+                break;
+        }
+
+        if (lista.Count == 0)
+        {
+            ShowNotification(
+                 new NotificationMessage
+                     {
+                         Severity = NotificationSeverity.Warning,
+                         Summary = "Criterio no encontrado"
+                     });
+        }
     }
 
     protected override void OnInitialized()
     {
-        Buscar();
+        lista = PersonasBLL.GetList(o => true);
     }
 
-    
+    void ShowNotification(NotificationMessage message)
+    {
+        notificationService.Notify(message);
+
+    }
 
 }

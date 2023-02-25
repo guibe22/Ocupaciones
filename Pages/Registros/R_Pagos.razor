@@ -1,16 +1,19 @@
 ﻿@page "/pago"
 
-@page "/pago/{PagosId:int}"
+@page "/pago/{PagoId:int}"
 
 @inject PersonasBLL PersonasBLL
-
 @inject PrestamosBLL PrestamosBLL
-
 @inject PagosBLL PagosBLL
+@inject NotificationService notificationService
 
-@inject PagosDetalleBLL PagosDetalleBLL
+
 
 <EditForm Model="pago" OnInvalidSubmit="Guardar">
+
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+    
 
 <div class= "card text-primary">
     <div class="card-header text-center">
@@ -22,14 +25,18 @@
 
             <div class="col-3">
                 <label for="txtId" class="form-label"> PagoID:</label>
-                <input type="number"  id="txtid" class="form-control" @bind-value="pago.PagosId">
+                <input type="number"  id="txtid" class="form-control" @bind-value="pago.PagoId" >
+            </div>
+
+            <div class="col-3 d-flex align-items-end">
+                <button name="btnBuscar" id="btnBuscar" class="btn btn-primary col-2" @onclick="Buscar" >
+                     <span class="oi oi-magnifying-glass"></span> 
+                </button>
             </div>
             
         </div>
 
-        <button name="btnBuscar" id="btnBuscar" class="btn btn-primary col-2" @onclick="Buscar">
-                 <span class="oi oi-magnifying-glass"></span> Buscar
-            </button>
+        
         <div class="row">
             <div class="col-6" >
                 <label for="txtPersonaID" class="form-label">PersonaID:</label>
@@ -40,60 +47,135 @@
                             <option value="@persona.PersonaId">@persona.Nombre</option>
                         }
                     </InputSelect>
+                    <ValidationMessage For="@(() => pago.PersonaId)" />
             </div>
 
-            <div class="col-6" >
-                <label for="txtPrestamoId" class="form-label">PrestamoID:</label>
-                
-                <InputSelect class="form-select" @bind-Value="pagoDetalle.PrestamoId">
 
-                         @if (PrestamosBLL.GetList(o => o.PersonaId == pago.PersonaId).Count == 1)
-                        {
-                            var prestamo = PrestamosBLL.GetList(o => o.PersonaId == pago.PersonaId).FirstOrDefault();
-
-                            pagoDetalle.PrestamoId = prestamo.PrestamoId;
-                         }
-                        @foreach (var prestamo in PrestamosBLL.GetList(o => o.PersonaId==pago.PersonaId) )
-                        {
-                            <option value="@prestamo.PrestamoId">@prestamo.Concepto</option>
-                        }
-                    </InputSelect>
+            <div class="col-6">
+                <label for="txtFecha" class="form-label"> Fecha:</label>
+                <input type="date"  id="txtFecha" class="form-control" @bind-value="pago.Fecha">
+                <ValidationMessage For="@(() => pago.Fecha)" />
             </div>
+
 
 
         </div>
 
         <div class="row">
-            <div class="col-6">
-                <label for="txtFecha" class="form-label"> Fecha:</label>
-                <input type="date"  id="txtFecha" class="form-control" @bind-value="pago.Fecha">
-            </div>
-
+            
              <div class="col-6">
                 <label for="txtConcepto" class="form-label"> Concepto:</label>
                 <input type="text"  id="txtConcepto" class="form-control" @bind-value="pago.Concepto">
+                <ValidationMessage For="@(() => pago.Concepto)" />
+            </div>
+
+            <div class="col-6">
+                <label for="txtMonto" class="form-label"> Monto:</label>
+                <input type="number"  id="txtMonto" class="form-control" @bind-value="pago.Monto">
+                <ValidationMessage For="@(() => pago.Monto)" />
             </div>
 
         </div>
 
+        <div class="my-4 text-dark ">
 
-         <div class="col-6">
-                <label for="txtMonto" class="form-label"> Monto:</label>
-                <input type="number"  id="txtMonto" class="form-control" @bind-value="pago.Monto">
+            <h5>Pago Detalle:</h5>
+
+            <div class="row">
+
+                <div class="col-4" >
+                    <label for="txtPrestamoId" class="form-label">PrestamoID:</label>
+                
+                    <InputSelect class="form-select" @bind-Value="pagosDetalle.PrestamoId">
+
+                             @if (PrestamosBLL.GetList(o => o.PersonaId == pago.PersonaId).Count == 1)
+                            {
+                                var prestamo = PrestamosBLL.GetList(o => o.PersonaId == pago.PersonaId).FirstOrDefault();
+                                if(prestamo!=null)
+                                    pagosDetalle.PrestamoId = prestamo.PrestamoId;
+                             }
+                            @foreach (var prestamo in PrestamosBLL.GetList(o => o.PersonaId==pago.PersonaId) )
+                            {
+                                <option value="@prestamo.PrestamoId">@prestamo.Concepto</option>
+                            }
+                    </InputSelect>
+                </div>
+
+
+                <div class="col-4">
+                    <label for="txtValorPagado" class="form-label"> Valor Pagado:</label>
+                    <input type="number"  id="txtValorPagado" class="form-control" @bind-value="pagosDetalle.ValorPagado">
+                    <ValidationMessage For="@(() => pagosDetalle.ValorPagado)" />
+                </div>
+
+                <div class="col-3 d-flex align-items-end">
+                    <button name="btnAgregar" id="btnAgregar" class="btn btn-dark mr-2" @onclick="Agregar" >
+                        <span class="oi oi-plus"></span> Agregar Detalle
+                    </button>
+                </div>
+            
+
+                
+            
+                
+
+                 <table class="table">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>PrestamoID</th>
+                    <th>PagoID</th>
+                    <th>Valor Pagado</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                    @if(pago.PagosDetalle!=null){
+                        @foreach (var detalle in pago.PagosDetalle)
+                        {
+                             <tr>
+                                <td>@detalle.Id</td>
+                                <td>@detalle.PrestamoId</td>
+                                <td>@detalle.PagoId</td>
+                                <td>@detalle.ValorPagado</td>
+                                <td> <button name="Btn" id="Btn" class="btn btn-danger mr-2"
+                                 @onclick=@(() => ElminarDetalle(detalle.Id))> 
+                                <span class="oi oi-trash"></span>
+                                </button>
+                                </td>
+                            
+                             </tr>
+                         }
+
+                    }
+                    
+                
+                
+            </tbody>
+        </table>
+
+
             </div>
 
+
+
     </div>
+    </div>
+
+
+   
     <div class=" card-footer text-center">
 
-             <button name="btNuevo" id="btNuevo" class="btn btn-primary mr-2" @onclick="Nuevo">
+             <button name="btNuevo" id="btNuevo" class="btn btn-primary mr-2" @onclick="Nuevo" >
             <span class="oi oi-plus"></span> Nuevo
             </button>
 
-            <button name="btnGuardar" id="btnGuardar" class="btn btn-success mr-2" @onclick="Guardar">
+            <button name="btnGuardar" id="btnGuardar" class="btn btn-success mr-2" @onclick="Guardar" >
             <span class=" oi oi-cloud-download"></span> Guardar
             </button>
 
-            <button name="btnEliminar" id="btnEliminar" class="btn btn-danger"  @onclick="Eliminar">
+            <button name="btnEliminar" id="btnEliminar" class="btn btn-danger" @onclick="Eliminar"  >
             <span class="oi oi-trash"></span> Eliminar
             </button>
         </div>
@@ -101,85 +183,184 @@
 
    
 
-    
 
 
 </EditForm>
 
 
+
+
 @code {
     [Parameter]
    
-public int PagosId{ get; set; }
+public int PagoId{ get; set; }
 
 public Pagos pago { get; set; }= new Pagos();
-public PagosDetalle pagoDetalle { get; set; }= new PagosDetalle();
+public PagosDetalle pagosDetalle{ get; set; }= new PagosDetalle();
+public Double _Total{ get; set; }
+
 
 protected override void OnInitialized()
 {
-    if(PagosId>0){
-                this.pago.PagosId = PagosId;
-                this.pagoDetalle.Id = PagosId;
-                this.Buscar();
-           }
-}
+    if(PagoId>0){
+        pago.PagoId= PagoId;
+        Buscar();
+    }
+
+}    
 
 void Buscar(){
 
-    var PagoEncontrado= PagosBLL.Buscar(pago.PagosId);
-    var PagoDetalleEncontrado= PagosDetalleBLL.Buscar(pago.PagosId);
-    if(PagoEncontrado!=null ){
-        this.pago= PagoEncontrado;
-        this.pagoDetalle= PagoDetalleEncontrado;
+    var Encontrado = PagosBLL.Buscar(pago.PagoId);
+
+    if(Encontrado!=null){
+        pago= Encontrado;
+
+        if(pago.PagosDetalle!=null){
+        
+
+        foreach (var detalle in pago.PagosDetalle)
+        {
+            _Total+= detalle.ValorPagado;
+        }
     }
+    }
+    else{
+            ShowNotification(
+                new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Summary = "este campo no existe en la base de datos."
+                });
+            }
+
 }
 
-void Eliminar(){
-
-
+void Agregar(){
+    double total= 0;
     
-    PagosBLL.Eliminar(pago);
-    PagosDetalleBLL.Eliminar(pagoDetalle);
-    this.Nuevo();
+    if(pago.PagosDetalle!=null){
+        
 
-   
+        foreach (var detalle in pago.PagosDetalle)
+        {
+            total+= detalle.ValorPagado;
+        }
+    }
+    total+= pagosDetalle.ValorPagado;
+    if(pagosDetalle.ValorPagado<=0){
+        ShowNotification(
+             new NotificationMessage
+            {
+                 Severity = NotificationSeverity.Warning,
+                 Summary = "El valor pagado debe ser superior a cero."
+             });
+
+        return;
+    }
+    
+    if(total<=pago.Monto)
+    {
+       
+        this.pago.PagosDetalle?.Add(pagosDetalle);
+        pagosDetalle= new PagosDetalle();
+        _Total=total;
+    }
+    else{
+
+        ShowNotification(
+             new NotificationMessage
+            {
+                 Severity = NotificationSeverity.Info,
+                 Summary = "EL valor total de los valores pagados debe ser igual al monto"
+             });
+
+    }
+        
+}
+
+void Nuevo(){
+    this.pago = new Pagos();
+}
+
+void Guardar(){
+    if(!Validar()){return;}
+    if(_Total!=pago.Monto){
+
+        ShowNotification(
+                    new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Warning,
+                        Summary = "EL valor total de los valores pagados debe ser igual al monto"
+                    });
+                 
+        return;
+        }
+
+    if(PagosBLL.Guardar(pago)){
+        ShowNotification(
+             new NotificationMessage
+            {
+                 Severity = NotificationSeverity.Success,
+                 Summary = "Guardado Correctamente."
+             });
+        Nuevo();
+    }
+    
+}
+void ElminarDetalle(int detalleIdSeleccionado){
+        if(pago.PagosDetalle!=null && detalleIdSeleccionado>0 ){
+            pago.PagosDetalle.RemoveAll(d => d.Id ==detalleIdSeleccionado );
+            _Total=0;
+            foreach (var detalle in pago.PagosDetalle)
+            {
+                _Total+= detalle.ValorPagado;
+            }
+        }
+           
 
 }
 
 bool Validar(){
+    bool validacion= true;
 
-      bool validacion= true;
-        if(!PersonasBLL.Existe(pago.PersonaId)){ validacion= false;}
-        if(!PrestamosBLL.Existe(pagoDetalle.PrestamoId)){   validacion= false;}
-        if(String.IsNullOrEmpty(pago.Concepto)){  validacion= false;}
-        if(pago.Monto <=0){  validacion =false;}
-       
+    if(pago.PersonaId==0){validacion=false;}
+    if(String.IsNullOrEmpty(pago.Concepto)){validacion=false;}
+    if(pago.Monto==0){validacion=false;}
 
-        return validacion;
-
-   
-}
-
-void Guardar(){
- if(!Validar()){  Console.WriteLine("**********************AQUI TA EL FALLO****************") ; return;}
-
- pagoDetalle.PersonaId= pago.PersonaId;
- pagoDetalle.ValorPagado = pago.Monto;
-
- PagosDetalleBLL.Guardar(pagoDetalle);
-
- if(PagosBLL.Guardar(pago) ){
-    this.Nuevo();
- }
-
-
+    return validacion;
 
 }
 
-void Nuevo(){
+void Eliminar(){
 
-        this.pago= new Pagos();
-        this.pagoDetalle = new PagosDetalle();
+     if(!PagosBLL.Existe(pago.PagoId)){
+
+                ShowNotification(
+                    new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Warning,
+                        Summary = "este campo no Existe en la base de datos"
+                    });
+
+                return;
+                }
+
+            if(PagosBLL.Eliminar(this.pago)){
+                this.Nuevo();
+                 ShowNotification(
+                    new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Info,
+                        Summary = "Eliminado correctamente"
+                    });
+            }
+
+}
+
+void ShowNotification(NotificationMessage message)
+    {
+        notificationService.Notify(message);
+
     }
-   
 }

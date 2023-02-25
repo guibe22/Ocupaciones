@@ -10,25 +10,30 @@ public class PagosBLL
     }
 
     public bool Existe(int PagosId){
-        return _Contexto.Pagos.Any(o => o.PagosId == PagosId);
+        return _Contexto.Pagos.Any(o => o.PagoId == PagosId);
     }
 
     private bool Insertar(Pagos Pago){
-        _Contexto.Pagos.Add(Pago);
+       
 
-        return _Contexto.SaveChanges() >0;
+         _Contexto.Pagos.Add(Pago);
+
+        return _Contexto.SaveChanges() > 0;
+
+
     }
 
     private bool Modificar(Pagos Pago){
+        
         _Contexto.Entry(Pago).State = EntityState.Modified;
-
-        return _Contexto.SaveChanges() >0;
+        
+        return _Contexto.SaveChanges()>0;
 
     }
 
 
     public bool Guardar( Pagos Pago){
-        if(!Existe(Pago.PagosId)){
+        if(!Existe(Pago.PagoId)){
             return this.Insertar(Pago);
         }
         else{
@@ -37,14 +42,18 @@ public class PagosBLL
     }
 
     public bool Eliminar (Pagos Pago){
-        _Contexto.Entry(Pago).State= EntityState.Deleted;
+     _Contexto.Entry(Pago).State= EntityState.Deleted;
 
     return _Contexto.SaveChanges() >0;
     }
 
     public Pagos? Buscar( int PagosId){
 
-        return _Contexto.Pagos.Where( o => o.PagosId==PagosId).AsTracking().SingleOrDefault();
+        return _Contexto.Pagos
+        .Include(o=> o.PagosDetalle)
+        .Where( o => o.PagoId==PagosId)
+        .AsTracking()
+        .SingleOrDefault();
 
     }
 

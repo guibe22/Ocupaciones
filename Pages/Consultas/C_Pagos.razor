@@ -1,13 +1,13 @@
 ﻿@page "/c_pagos"
 @inject PagosBLL PagosBLL;
-@inject PagosDetalleBLL PagosDetalleBLL ;
+
 
 <EditForm Model="lista">
     <DataAnnotationsValidator />
 
     
 
-    <div class="card">
+    <div class="card text-primary">
     <div class="card-header text-center" >
         <h3>Consulta Prestamos</h3>
     </div>
@@ -28,12 +28,12 @@
                 @foreach (var pago in lista)
                 {
                     <tr>
-                        <td>@pago.PagosId</td>
+                        <td>@pago.PagoId</td>
                         <td>@pago.Fecha</td>
                         <td>@pago.PersonaId</td>
                         <td>@pago.Concepto</td>
                         <td>@pago.Monto</td>
-                        <td><a href="pago/@pago.PagosId">Ver</a></td>
+                        <td><a href="pago/@pago.PagoId">Ver</a></td>
                     </tr>
                 }
             </tbody>

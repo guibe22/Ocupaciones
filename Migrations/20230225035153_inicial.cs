@@ -29,31 +29,16 @@ namespace prestamos.Migrations
                 name: "Pagos",
                 columns: table => new
                 {
-                    PagosId = table.Column<int>(type: "INTEGER", nullable: false)
+                    PagoId = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Fecha = table.Column<DateTime>(type: "TEXT", nullable: false),
                     PersonaId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Concepto = table.Column<string>(type: "TEXT", nullable: true),
-                    Monto = table.Column<int>(type: "INTEGER", nullable: false)
+                    Concepto = table.Column<string>(type: "TEXT", nullable: false),
+                    Monto = table.Column<double>(type: "REAL", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Pagos", x => x.PagosId);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PagosDetalle",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    PersonaId = table.Column<int>(type: "INTEGER", nullable: false),
-                    PrestamoId = table.Column<int>(type: "INTEGER", nullable: false),
-                    ValorPagado = table.Column<int>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PagosDetalle", x => x.Id);
+                    table.PrimaryKey("PK_Pagos", x => x.PagoId);
                 });
 
             migrationBuilder.CreateTable(
@@ -62,11 +47,11 @@ namespace prestamos.Migrations
                 {
                     PersonaId = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Nombre = table.Column<string>(type: "TEXT", nullable: true),
-                    Telefono = table.Column<string>(type: "TEXT", nullable: true),
-                    Celular = table.Column<string>(type: "TEXT", nullable: true),
-                    Email = table.Column<string>(type: "TEXT", nullable: true),
-                    Direccion = table.Column<string>(type: "TEXT", nullable: true),
+                    Nombre = table.Column<string>(type: "TEXT", nullable: false),
+                    Telefono = table.Column<string>(type: "TEXT", maxLength: 10, nullable: false),
+                    Celular = table.Column<string>(type: "TEXT", maxLength: 10, nullable: false),
+                    Email = table.Column<string>(type: "TEXT", nullable: false),
+                    Direccion = table.Column<string>(type: "TEXT", nullable: false),
                     FechaNacimiento = table.Column<DateTime>(type: "TEXT", nullable: false),
                     OcupacionId = table.Column<int>(type: "INTEGER", nullable: false),
                     Balance = table.Column<int>(type: "INTEGER", nullable: false)
@@ -85,7 +70,7 @@ namespace prestamos.Migrations
                     Fecha = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Vence = table.Column<DateTime>(type: "TEXT", nullable: false),
                     PersonaId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Concepto = table.Column<string>(type: "TEXT", nullable: true),
+                    Concepto = table.Column<string>(type: "TEXT", nullable: false),
                     Monto = table.Column<int>(type: "INTEGER", nullable: false),
                     Balance = table.Column<int>(type: "INTEGER", nullable: false)
                 },
@@ -93,6 +78,31 @@ namespace prestamos.Migrations
                 {
                     table.PrimaryKey("PK_Prestamos", x => x.PrestamoId);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "PagosDetalle",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    PagoId = table.Column<int>(type: "INTEGER", nullable: true),
+                    PrestamoId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ValorPagado = table.Column<double>(type: "REAL", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PagosDetalle", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PagosDetalle_Pagos_PagoId",
+                        column: x => x.PagoId,
+                        principalTable: "Pagos",
+                        principalColumn: "PagoId");
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PagosDetalle_PagoId",
+                table: "PagosDetalle",
+                column: "PagoId");
         }
 
         /// <inheritdoc />
@@ -102,9 +112,6 @@ namespace prestamos.Migrations
                 name: "Opcupaciones");
 
             migrationBuilder.DropTable(
-                name: "Pagos");
-
-            migrationBuilder.DropTable(
                 name: "PagosDetalle");
 
             migrationBuilder.DropTable(
@@ -112,6 +119,9 @@ namespace prestamos.Migrations
 
             migrationBuilder.DropTable(
                 name: "Prestamos");
+
+            migrationBuilder.DropTable(
+                name: "Pagos");
         }
     }
 }

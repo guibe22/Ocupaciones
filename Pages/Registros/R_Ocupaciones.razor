@@ -1,41 +1,59 @@
-﻿@page "/ocupacion"
+﻿
+@page "/ocupacion"
 @page "/ocupacion/{OcupacionId:int}"
 @inject OcupacionesBLL ocupacionesBll
+@inject NotificationService notificationService
+
 
 
 <EditForm Model="ocupacion" OnInvalidSubmit="Guardar">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+    
     <div class="card">
     <div class="card-header text-center">
         <h2 class="text-primary">Registro de Ocupaciones</h2>
     </div>
+    
     <div class="card-body">
         <div class="form-row align-items-center">
-            <div class="col-auto">
-
-                <label for="idOcupacion" class="text-primary">ID Ocupación:</label>
-                <InputNumber @bind-Value="ocupacion.OcupacionId" class="form-control col-4" />
-
-                <button name="btnBuscar" id="btnBuscar" class="btn btn-primary" @onclick="Buscar">
-                    <span class="oi oi-magnifying-glass"></span> Buscar
-                </button>
+            <div class="row">
+                <div class="col-3">
+                    <label for="idOcupacion" class="text-primary">ID Ocupación:</label>
+                    <InputNumber @bind-Value="ocupacion.OcupacionId" class="form-control col-4" />
+                </div>
+               <div class="col-3 d-flex align-items-end">
+                     <button name="btnBuscar" id="btnBuscar" class="btn btn-primary col-2" >
+                        <span class="oi oi-magnifying-glass"></span> 
+                    </button>
+                </div>
+               
             </div>
             
         </div>
-        <div class="form-group">
-            <label for="txtDescripcion" class="text-primary">Descripción:</label>
-            <InputText @bind-Value="ocupacion.Descripcion" class="form-control" />
+
+        <div class="row">
+
+            <div class="col-6">
+                <label for="txtDescripcion" class="text-primary">Descripción:</label>
+                <InputText @bind-Value="ocupacion.Descripcion" class="form-control" />
+                <ValidationMessage For="@(() => ocupacion.Descripcion)" />
+            </div>
         </div>
-        <div class="form-group ">
-            <label for="txtsalario" class="text-primary">Salario:</label>
-            <InputNumber @bind-Value="ocupacion.Salario" class="form-control" />
+        <div class="row">
+            <div class="col-6 ">
+                <label for="txtsalario" class="text-primary">Salario:</label>
+                <InputNumber @bind-Value="ocupacion.Salario" class="form-control"  />
+                <ValidationMessage For="@(() => ocupacion.Salario)"/>
+            </div>
         </div>
     </div>
 
     <div class=" card-footer text-center">
-        <button name="btNuevo" id="btNuevo" class="btn btn-primary mr-2" @onclick="Nuevo">
+        <button  name="btNuevo" id="btNuevo" class="btn btn-primary mr-2"   @onclick="Nuevo">
             <span class="oi oi-plus"></span> Nuevo
-        </button>
-        <button name="btnGuardar" id="btnGuardar" class="btn btn-success mr-2" @onclick="Guardar">
+        </button >
+        <button name="btnGuardar" id="btnGuardar" class="btn btn-success mr-2" type="submit" @onclick="Guardar">
             <span class=" oi oi-cloud-download"></span> Guardar
         </button>
         <button name="btnEliminar" id="btnEliminar" class="btn btn-danger"  @onclick="Eliminar">
@@ -53,14 +71,15 @@
 
     public int OcupacionId { get; set; }
     public Ocupaciones ocupacion{get; set;} = new Ocupaciones();
-
-    // incializar
+   
+   
 
         protected override void OnInitialized()
         {
             if(OcupacionId>0){
                 this.ocupacion.OcupacionId= OcupacionId;
                 this.Buscar();
+                
             }
         }
 
@@ -72,22 +91,52 @@
             if(OcupacionEncontrada!=null){
                 this.ocupacion= OcupacionEncontrada;
             }
+            else{
+                 ShowNotification(
+                    new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Warning,
+                        Summary = "este campo no existe en la base de datos."
+                    });
+            }
         }
 
 
         void Nuevo(){
-
             this.ocupacion= new Ocupaciones();
-
+            
         }
 
 
         void Guardar(){
 
+            if(ocupacionesBll.GetList(o => o.Descripcion== ocupacion.Descripcion ).Count==1
+            && !ocupacionesBll.Existe(ocupacion.OcupacionId)){
+                ShowNotification(
+                    new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Summary = "Esta ocupación ya existe en la base de datos."
+                    });
+                    return;
+
+            }
+
             if(!Validar()){ return;}
 
             if(ocupacionesBll.Guardar(this.ocupacion)){
+                
                 this.Nuevo();
+
+                 ShowNotification(
+                    new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Success,
+                        Summary = "Guardado correctamente"
+                    });
+
+             
+                
             }
 
 
@@ -96,16 +145,55 @@
 
 
 
-        bool Validar()=> !string.IsNullOrEmpty(ocupacion.Descripcion) && ocupacion.Salario >= 0;
+        bool Validar(){
+            
+            if(!string.IsNullOrEmpty(ocupacion.Descripcion) && ocupacion.Salario >0){
+                return true;
+            }
+            else{
+               
+                return false;
+            }
+
+        } 
 
 
 
         void Eliminar(){
-            ocupacionesBll.Eliminar(this.ocupacion);
+            if(!ocupacionesBll.Existe(ocupacion.OcupacionId)){
+
+                ShowNotification(
+                    new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Warning,
+                        Summary = "este campo no Existe en la base de datos"
+                    });
+                
+                
+                
+                return;
+                }
+            if(ocupacionesBll.Eliminar(this.ocupacion)){
+                this.Nuevo();
+                 ShowNotification(
+                    new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Info,
+                        Summary = "Eliminado correctamente"
+                    });
+                 
+
+            }
+    
+            
         }
 
 
+ void ShowNotification(NotificationMessage message)
+    {
+        notificationService.Notify(message);
 
+    }
 
 }
 
