@@ -237,6 +237,21 @@ void Buscar(){
 }
 
 void Agregar(){
+
+    
+
+    if(pagosDetalle.PrestamoId<=0){
+
+        ShowNotification(
+             new NotificationMessage
+            {
+                 Severity = NotificationSeverity.Warning,
+                 Summary = "tiene que seleccionar un prestamo."
+             });
+
+        return;
+
+    }
     double total= 0;
     
     if(pago.PagosDetalle!=null){
@@ -284,6 +299,11 @@ void Nuevo(){
 }
 
 void Guardar(){
+
+   
+  try{
+
+  
     if(!Validar()){return;}
     if(_Total!=pago.Monto){
 
@@ -306,6 +326,20 @@ void Guardar(){
              });
         Nuevo();
     }
+
+    } catch (Exception ex) {
+ 
+    ShowNotification(new NotificationMessage {
+        Severity = NotificationSeverity.Error,
+        Summary = "Error al guardar la entidad: " + ex.Message
+    });
+    return;
+}
+
+
+
+
+
     
 }
 void ElminarDetalle(int detalleIdSeleccionado){
