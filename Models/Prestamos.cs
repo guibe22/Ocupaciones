@@ -20,11 +20,11 @@ public class Prestamos
 
     [Required(ErrorMessage = "el monto es requerido")]
     [Range(0.01, double.MaxValue, ErrorMessage = "El Monto debe ser mayor que cero")]
-    public int Monto { get; set; }
+    public double Monto { get; set; }
 
     [Required(ErrorMessage = "el balance  es requerido")]
    
-    public int Balance { get; set; }
+    public double Balance { get; set; }
 
 
 

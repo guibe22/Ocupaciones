@@ -71,12 +71,6 @@
                 <input type="number"  id="txtMonto" class="form-control" @bind-value="prestamo.Monto">
                 <ValidationMessage For="@(() => prestamo.Monto)" />
             </div>
-
-            <div class="col-6">
-                <label for="txtBalance">Balance:</label>
-                <input type="text"  id="txtBalance" class="form-control" @bind-value="prestamo.Balance">
-                <ValidationMessage For="@(() => prestamo.Balance)" />
-            </div>
         </div>
 
         
@@ -162,7 +156,7 @@
         if(!PersonasBLL.Existe(prestamo.PersonaId)){ validacion= false;}
         if(String.IsNullOrEmpty(prestamo.Concepto)){ validacion= false;}
         if(prestamo.Monto <=0){validacion =false;}
-        if(prestamo.Balance<=0){ validacion= false;}
+        
 
         return validacion;
 
@@ -181,29 +175,13 @@
                     Summary = "Guardado Correctamente"
                 });
 
-           ActualizarBalance();
+          
            this.Nuevo();
            
         }
     }
 
-    void ActualizarBalance(){
-
-        var persona = PersonasBLL.Buscar(prestamo.PersonaId);
-       List<Prestamos> lista=  PrestamosBLL.GetList(o => o.PersonaId == prestamo.PersonaId);
-        int total=0;
-        foreach (var prestamo in lista)
-        {
-            total= total + prestamo.Balance;
-        }
-
-        if(persona!=null){
-            persona.Balance= total;
-            PersonasBLL.Guardar(persona);
-        }
-
-        
-    }
+    
 
     
 

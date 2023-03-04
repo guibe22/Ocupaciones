@@ -26,7 +26,7 @@ public class Personas
     [Required(ErrorMessage = "La ocupacion es requerida")]
     public int OcupacionId { get; set; }
 
-    public int Balance { get; set; }
+    public double Balance { get; set; }
 
 
 
